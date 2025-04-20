@@ -27,7 +27,8 @@ function formatSessions(data) {
 
     const standings = session.results.map((result, index) => {
 
-      isDNF = result.reason_out !== "Running" || false;
+      isDNF = result.reason_out === "Disconnected" || false;
+      isDSQ = result.reason_out === "Disqualified" || false;
 
       const position = result.position + 1;
       const name = result.display_name || 'Unknown';
@@ -42,11 +43,15 @@ function formatSessions(data) {
             class_interval = `+${lapsBehindLeader}L`;
         }
 
-      const class_interval_or_dnf = isDNF ? 'DNF' : class_interval;
+      let class_intervall_or_reason_out;
+
+      if (isDNF) { class_intervall_or_reason_out = 'DNF'; }
+      else if (isDSQ) {class_intervall_or_reason_out = 'DSQ';}
+      else { class_intervall_or_reason_out = class_interval; }
 
 
       const carClass = result.car_class_short_name || 'N/A';
-      return `${position.toString().padStart(2, ' ')}  ${name.padEnd(20, ' ')}  ${laps.toString().padStart(3, ' ')}L  ${class_interval_or_dnf.toString().padStart(6, ' ')}  ${carClass.replaceAll(" Class", "")}`;
+      return `${position.toString().padStart(2, ' ')}  ${name.padEnd(20, ' ')}  ${laps.toString().padStart(3, ' ')}L  ${class_intervall_or_reason_out.toString().padStart(6, ' ')}  ${carClass.replaceAll(" Class", "")}`;
     });
 
     output += formatTable(standings, ['P.', 'Name', 'L.', 'Int.', 'Cat.']);
