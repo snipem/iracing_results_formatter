@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>iRacing Sessions and Standings</title>
+  <title>iRacing Sessions and Standings Formatter for WhatsApp, Signal, Discord</title>
   <style>
     body {
       font-family: 'Arial', sans-serif;
@@ -115,7 +115,7 @@
   </style>
 </head>
 <body>
-<h1>iRacing Sessions and Standings</h1>
+<h1>iRacing Sessions and Standings Formatter for WhatsApp, Signal, Discord</h1>
 <p>1. Go to <a href="https://members-ng.iracing.com/web/racing/results-stats/results" target="_blank">Results View in iRacing</a> and export the JSON Report</p>
 <p><img src="res/export.png" style="zoom:40%;" alt="Showing Export JSON Button in Results View"/></p>
 <p>2. Upload here</p>
@@ -123,7 +123,15 @@
 <div id="buttonContainer">
   <button id="copyButton">Copy to Clipboard</button>
 </div>
-<div id="output"></div>
+<p>3. Copy to clipboard</p>
+<div id="output">
+</div>
+<p>Made for the <a href="https://rookie-racing.eu/">Rookie Racing League</a></p>
+<p>
+  <a href="https://rookie-racing.eu/">
+    <img src="res/rrl.png" style="zoom:10%;" alt="Showing Export JSON Button in Results View"/>
+  </a>
+</p>
 <script src="script.js"></script>
 <script>
   document.getElementById('fileInput').addEventListener('change', function(event) {
