@@ -5,21 +5,123 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>iRacing Sessions and Standings</title>
   <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+      line-height: 1.6;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 2rem;
+      color: #222;
+    }
+
+    p {
+      text-align: center;
+      margin: 10px 0;
+      color: #555;
+    }
+
+    img {
+      display: block;
+      margin: 10px auto;
+      max-width: 100%;
+      height: auto;
+    }
+
+    #fileInput {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 15px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #fileInput:hover {
+      border-color: #007bff;
+      background-color: #f0f8ff;
+    }
+
+    #copyButton {
+      display: none; /* Initially hidden */
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 1rem;
+      color: #fff;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    #copyButton:hover {
+      background-color: #0056b3;
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    #output {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      overflow-x: auto;
+    }
+
     pre {
-      font-family: monospace;
+      font-family: 'Courier New', monospace;
       background: #f4f4f4;
-      padding: 10px;
+      padding: 15px;
+      border-radius: 5px;
       border: 1px solid #ddd;
       overflow-x: auto;
+    }
+
+    #buttonContainer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      #fileInput, #copyButton {
+        width: 90%;
+        font-size: 0.9rem;
+      }
+
+      #output {
+        padding: 15px;
+      }
     }
   </style>
 </head>
 <body>
 <h1>iRacing Sessions and Standings</h1>
 <p>Go to Results View in iRacing and export the JSON Report</p>
-<p><img src="res/export.png" style="zoom:50%;"  alt="Showing Export JSON Button in Results View"/></p>
+<p><img src="res/export.png" style="zoom:50%;" alt="Showing Export JSON Button in Results View"/></p>
 <p>Upload here</p>
 <input type="file" id="fileInput" accept=".json">
+<div id="buttonContainer">
+  <button id="copyButton">Copy to Clipboard</button>
+</div>
 <div id="output"></div>
 <script src="script.js"></script>
 <script>
@@ -33,6 +135,29 @@
         const json = JSON.parse(e.target.result);
         const output = formatSessions(json.data);
         document.getElementById('output').innerHTML = output;
+
+        // Show the copy button
+        const copyButton = document.getElementById('copyButton');
+        copyButton.style.display = 'inline-block';
+
+        // Attach the event listener for the copy button
+        copyButton.addEventListener('click', function() {
+          const outputDiv = document.getElementById('output');
+          const range = document.createRange();
+          range.selectNodeContents(outputDiv);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+
+          try {
+            document.execCommand('copy');
+            alert('Content copied to clipboard!');
+          } catch (err) {
+            alert('Failed to copy content.');
+          }
+
+          selection.removeAllRanges();
+        });
       } catch (err) {
         console.log(err);
         alert(err);
@@ -40,8 +165,6 @@
     };
     reader.readAsText(file);
   });
-
 </script>
-
 </body>
 </html>

@@ -6,7 +6,7 @@ function formatSessions(data) {
       : 'N/A';
   const trackName = data.track?.track_name || 'N/A';
 
-  let output = `<h1>Session Results</h1>\n`;
+  let output = `<h1>*Session Results*</h1>\n`;
   output += `<p>Start Time: ${startTime}</p>\n`;
   output += `<p>Track Name: ${trackName}</p>\n`;
 
