@@ -51,10 +51,10 @@ function formatSessions(data) {
 
 
       const carClass = result.car_class_short_name || 'N/A';
-      return `${position.toString().padStart(2, ' ')}  ${name.padEnd(20, ' ')}  ${laps.toString().padStart(3, ' ')}L  ${class_intervall_or_reason_out.toString().padStart(6, ' ')}  ${carClass.replaceAll(" Class", "")}`;
+      return `${position.toString().padStart(2, ' ')}  ${name.padEnd(20, ' ')}  ${class_intervall_or_reason_out.toString().padStart(6, ' ')}  ${carClass.replaceAll(" Class", "")}`;
     });
 
-    output += formatTable(standings, ['P.', 'Name', 'L.', 'Int.', 'Cat.']);
+    output += formatTable(standings, ['P.', 'Name', 'Int.', 'Cat.']);
 
     // Get best lap
 
@@ -79,21 +79,18 @@ function formatSessions(data) {
 }
 
 function shortenName(name, maxLength) {
-  if (name.length <= maxLength || maxLength <= 0) return name;
-  if (name.length === 1) return '~';
-  return name.slice(0, maxLength - 1) + '~';
+  if (!name || name.length === 0) return name;
+
+  const parts = name.split(/\s+/); // Split by whitespace
+  if (parts.length > 0) {
+    parts[0] = parts[0][0] + '.'; // Replace the first word with its initial and a period
+  }
+
+  const shortenedName = parts.join(' '); // Rejoin the name
+  return shortenedName.length <= maxLength ? shortenedName : shortenedName.slice(0, maxLength - 1) + '~';
 }
 
-function formatTable(rows, headers) {
-  const maxLineLength = 30;
-
-  const columnWidths = headers.map((header, index) => {
-    return Math.max(
-        header.length,
-        ...rows.map(row => row.split(/\s{2,}/)[index]?.trim().length || 0)
-    );
-  });
-
+function generateTable(rows, headers, columnWidths) {
   const headerRow = headers
       .map((header, index) => header.padEnd(columnWidths[index]))
       .join('  ') + '\n';
@@ -104,7 +101,7 @@ function formatTable(rows, headers) {
 
   const bodyRows = rows.map(row => {
     const cells = row.split(/\s{2,}/).map((cell, index) => cell.trim());
-    let formattedRow = cells
+    return cells
         .map((cell, index) => {
           if (headers[index] === 'Int.') {
             return cell.padStart(columnWidths[index]);
@@ -112,28 +109,66 @@ function formatTable(rows, headers) {
           return cell.padEnd(columnWidths[index]);
         })
         .join('  ');
-
-    if (formattedRow.length > maxLineLength) {
-      const nameIndex = headers.indexOf('Name');
-      if (nameIndex !== -1) {
-        cells[nameIndex] = shortenName(cells[nameIndex], columnWidths[nameIndex] - 1);
-        formattedRow = cells
-            .map((cell, index) => {
-              if (headers[index] === 'Int.') {
-                return cell.padStart(columnWidths[index]);
-              }
-              return cell.padEnd(columnWidths[index]);
-            })
-            .join('  ');
-      }
-    }
-
-    return formattedRow;
   }).join('\n');
 
   return headerRow + separatorRow + bodyRows + '\n';
 }
 
+function formatTable(rows, headers) {
+  const maxLineLength = 30; // Maximum allowed line length
+
+  // Check if the "Cat." column has uniform values
+  const categoryIndex = headers.indexOf('Cat.');
+  if (categoryIndex !== -1) {
+    const allCategories = rows.map(row => row.split(/\s{2,}/)[categoryIndex]?.trim());
+    const isUniformCategory = allCategories.every(cat => cat === allCategories[0]);
+
+    if (isUniformCategory) {
+      // Remove the "Cat." column
+      headers.splice(categoryIndex, 1);
+      rows = rows.map(row => {
+        const cells = row.split(/\s{2,}/);
+        cells.splice(categoryIndex, 1);
+        return cells.join('  ');
+      });
+    }
+  }
+
+  // Calculate column widths
+  const columnWidths = headers.map((header, index) => {
+    return Math.max(
+        header.length,
+        ...rows.map(row => row.split(/\s{2,}/)[index]?.trim().length || 0)
+    );
+  });
+
+  // Generate the table
+  let table = generateTable(rows, headers, columnWidths);
+
+  // Check if the table exceeds the max line length
+  while (table.split('\n').some(line => line.length > maxLineLength)) {
+    const nameIndex = headers.indexOf('Name');
+    if (nameIndex === -1) break; // No "Name" column to shorten
+
+    // Shorten the "Name" column
+    rows = rows.map(row => {
+      const cells = row.split(/\s{2,}/);
+      cells[nameIndex] = shortenName(cells[nameIndex], columnWidths[nameIndex] - 1);
+      return cells.join('  ');
+    });
+
+    // Recalculate column widths
+    columnWidths[nameIndex] = Math.max(
+        headers[nameIndex].length,
+        ...rows.map(row => row.split(/\s{2,}/)[nameIndex]?.trim().length || 0)
+    );
+
+    // Regenerate the table
+    table = generateTable(rows, headers, columnWidths);
+  }
+
+  return table;
+}
 function formatTime(milliseconds) {
   if (milliseconds === undefined || milliseconds === null || milliseconds < 0) {
     return '-';
