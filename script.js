@@ -13,6 +13,12 @@ function formatSessions(data) {
 
 
   sessions.forEach((session, sessionIndex) => {
+
+    // ignore if open practice
+    if (session.simsession_type_name === "Open Practice") {
+      return;
+    }
+
     const sessionName = session.simsession_type_name || `Session ${sessionIndex + 1}`;
     output += `<h2>*${sessionName}*</h2><pre>\n`;
     output += "```\n";
