@@ -33,7 +33,15 @@ function formatSessions(data) {
       const name = result.display_name || 'Unknown';
       const laps = result.laps_complete || 0;
 
-      const class_interval = formatTime(result.class_interval / 10 || 0);
+      var class_interval = formatTime(result.class_interval / 10 || 0);
+
+      // if class interval is "-" then give the difference in laps to the leader
+        if (class_interval === '-') {
+            const leaderLaps = session.results[0].laps_complete || 0;
+            const lapsBehindLeader = leaderLaps - laps;
+            class_interval = `+${lapsBehindLeader}L`;
+        }
+
       const class_interval_or_dnf = isDNF ? 'DNF' : class_interval;
 
 
